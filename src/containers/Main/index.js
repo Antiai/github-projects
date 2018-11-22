@@ -1,17 +1,32 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {graphql} from 'react-apollo';
+import {graphql, compose} from 'react-apollo';
 import * as queries from '../../qraphql/queries';
 import * as utils from '../../utils';
 import ListRepos from '../../components/ListRepos';
 import Layout from '../../components/Layout';
 import {Header} from 'semantic-ui-react';
+import FormFilter from '../../components/FormFilter';
 
 class Main extends Component {
   static propTypes = {
     query: PropTypes.string,
     first: PropTypes.number,
   };
+
+  getLicenseOptions() {
+    const {
+      dataLicenses: {licenses, loading},
+    } = this.props;
+
+    if (loading) return [];
+
+    return licenses.map((license) => ({
+      key: license.id,
+      value: license.id,
+      text: license.name,
+    }));
+  }
 
   render() {
     const {
@@ -25,17 +40,23 @@ class Main extends Component {
     return (
       <Layout>
         <Header as="h1">Популярные новинки месяца</Header>
+        <FormFilter options={{licenses: this.getLicenseOptions()}} />
         <ListRepos items={items} />
       </Layout>
     );
   }
 }
 
-export default graphql(queries.repos.FIND_REPOS, {
-  options: (props) => ({
-    variables: {
-      query: props.query,
-      first: props.first,
-    },
+export default compose(
+  graphql(queries.repos.FIND_REPOS, {
+    options: (props) => ({
+      variables: {
+        query: props.query,
+        first: props.first,
+      },
+    }),
   }),
-})(Main);
+  graphql(queries.licenses.GET_LICENSES, {
+    name: 'dataLicenses',
+  })
+)(Main);

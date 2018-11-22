@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Grid, Icon, List, Segment} from 'semantic-ui-react';
+import {Icon, List, Segment} from 'semantic-ui-react';
 import get from 'lodash/get';
 
 import './style.css';
@@ -27,7 +27,9 @@ class ListRepos extends Component {
 
       const licenseName = get(licenseInfo, 'name', '');
       const license = licenseName ? (
-        <span className="list-repos__info list-repos__info-fade">License: {get(licenseInfo, 'name')}</span>
+        <span className="list-repos__info list-repos__info-fade">
+          License: {get(licenseInfo, 'name')}
+        </span>
       ) : null;
 
       return (
