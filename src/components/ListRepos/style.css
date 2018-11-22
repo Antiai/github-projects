@@ -1,0 +1,19 @@
+.list-repos__description {
+  margin-top: 5px;
+}
+
+.list-repos__wrap {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.list-repos__info {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.list-repos__info-fade {
+  color: #999;
+}
