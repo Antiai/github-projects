@@ -1,3 +1,13 @@
+## Installation
+
+1. clone repository
+2. create `.env.local` file or copy and rename `env.dist` file
+3. get a new token on this page https://github.com/settings/tokens
+4. paste this token to `REACT_APP_API_TOKEN` in `.env.local` file
+5. run `yarn` or `npm i`
+6. run `yarn start` or `npm start`
+7. go to `http://localhost:3000`
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
