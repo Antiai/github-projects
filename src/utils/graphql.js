@@ -7,7 +7,7 @@ const LANGUAGE = 'JavaScript';
 const STARS = '>0';
 const LICENSE = '';
 const QUERY = '';
-const FIRST = 10;
+const FIRST = '10';
 
 export default {
   getVariables: ({
@@ -26,7 +26,7 @@ export default {
 
     return {
       query: `language:${language} stars:${stars} created:${created} ${licenseFilter} ${query}`,
-      first,
+      first: +first,
     };
   },
 };

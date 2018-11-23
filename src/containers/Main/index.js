@@ -51,7 +51,6 @@ class Main extends Component {
   };
 
   handleSubmit = (data) => {
-    // debugger
     const {
       match: {url},
       location: {search},

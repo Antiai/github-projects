@@ -10,6 +10,8 @@ class FormFilter extends Component {
     }),
     data: PropTypes.shape({
       license: PropTypes.string,
+      query: PropTypes.string,
+      first: PropTypes.string,
     }),
     loading: PropTypes.bool,
     handleSubmit: PropTypes.func,
@@ -23,6 +25,7 @@ class FormFilter extends Component {
     data: {
       license: '',
       query: '',
+      first: '10',
     },
     loading: false,
     handleSubmit: noop,
@@ -48,21 +51,21 @@ class FormFilter extends Component {
   render() {
     const {
       options: {licenses},
-      data: {license, query},
+      data: {license, query, first},
       loading,
     } = this.props;
+
     return (
-      <Form size="large" onSubmit={this.onSubmit}>
-        <Grid stackable>
+      <Form size="medium" onSubmit={this.onSubmit}>
+        <Grid stackable doubling columns={3}>
           <Grid.Row>
-            <Grid.Column width={10}>
+            <Grid.Column width={6} fluid>
               <Form.Input
                 name="query"
                 defaultValue={query}
                 placeholder="Поиск по названию"
                 loading={loading}
                 disabled={loading}
-                clearable
                 action={{icon: 'search', color: 'teal'}}
                 onChange={this.onChange}
               />
@@ -80,6 +83,19 @@ class FormFilter extends Component {
                 onChange={this.onChange}
               />
             </Grid.Column>
+            <Grid.Column width={4}>
+              <Form.Select
+                name="first"
+                options={showOptions}
+                value={first}
+                defaultValue={showOptions[0].value}
+                placeholder="Показывать по"
+                loading={loading}
+                disabled={loading}
+                action={{icon: 'search', color: 'teal'}}
+                onChange={this.onChange}
+              />
+            </Grid.Column>
           </Grid.Row>
         </Grid>
       </Form>
@@ -88,3 +104,9 @@ class FormFilter extends Component {
 }
 
 export default FormFilter;
+
+const showOptions = [
+  {text: 'Топ 10', value: '10'},
+  {text: 'Топ 20', value: '20'},
+  // add more here if you need
+];

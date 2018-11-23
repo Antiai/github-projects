@@ -14,6 +14,15 @@ class ListRepos extends Component {
     items: [],
   };
 
+  renderMessage() {
+    return (
+      <Message>
+        <Message.Header>Ничего не найдено</Message.Header>
+        <Message.Content>Пожалуйста, измените запрос</Message.Content>
+      </Message>
+    );
+  }
+
   renderItems() {
     const {items} = this.props;
 
@@ -70,10 +79,7 @@ class ListRepos extends Component {
     const {items} = this.props;
 
     return !items.length ? (
-      <Message>
-        <Message.Header>Ничего не найдено</Message.Header>
-        <Message.Content>Пожалуйста, измените запрос</Message.Content>
-      </Message>
+      this.renderMessage()
     ) : (
       <Segment>
         <List selection relaxed divided size="large">
