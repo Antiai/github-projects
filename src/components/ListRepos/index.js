@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Icon, List, Segment} from 'semantic-ui-react';
+import {Icon, List, Message, Segment} from 'semantic-ui-react';
 import get from 'lodash/get';
 
 import './style.css';
@@ -67,7 +67,14 @@ class ListRepos extends Component {
   }
 
   render() {
-    return (
+    const {items} = this.props;
+
+    return !items.length ? (
+      <Message>
+        <Message.Header>Ничего не найдено</Message.Header>
+        <Message.Content>Пожалуйста, измените запрос</Message.Content>
+      </Message>
+    ) : (
       <Segment>
         <List selection relaxed divided size="large">
           {this.renderItems()}
