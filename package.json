@@ -5,6 +5,7 @@
   "dependencies": {
     "apollo-boost": "^0.1.21",
     "axios": "^0.18.0",
+    "dayjs": "^1.7.7",
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
     "lint-staged": "^8.0.5",
@@ -14,9 +15,11 @@
     "react": "^16.6.3",
     "react-apollo": "^2.3.1",
     "react-dom": "^16.6.3",
+    "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.1",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.83.0"
+    "semantic-ui-react": "^0.83.0",
+    "url-search-params-polyfill": "^5.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

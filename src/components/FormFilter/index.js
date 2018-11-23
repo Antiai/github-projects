@@ -1,19 +1,31 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Form} from 'semantic-ui-react';
+import noop from 'lodash/noop';
 
 class FormFilter extends Component {
   static propTypes = {
     options: PropTypes.shape({
       licenses: PropTypes.array,
     }),
-    filters: PropTypes.object,
+    handleSubmit: PropTypes.func,
+    handleChange: PropTypes.func,
   };
 
   static defaultProps = {
     options: {
       licenses: [],
     },
+    handleSubmit: noop,
+    handleChange: noop,
+  };
+
+  onChange = (e, field) => {
+    this.props.handleChange(field);
+  };
+
+  onSubmit = () => {
+    this.props.handleSubmit();
   };
 
   render() {
@@ -21,11 +33,14 @@ class FormFilter extends Component {
       options: {licenses},
     } = this.props;
     return (
-      <Form size="large">
+      <Form size="large" onSubmit={this.onSubmit}>
         <Form.Select
           name="license"
           options={licenses}
           placeholder="Тип лицензии"
+          search
+          clearable
+          onChange={this.onChange}
         />
       </Form>
     );

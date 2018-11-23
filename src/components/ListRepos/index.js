@@ -10,6 +10,10 @@ class ListRepos extends Component {
     items: PropTypes.arrayOf(PropTypes.object),
   };
 
+  static defaultProps = {
+    items: [],
+  };
+
   renderItems() {
     const {items} = this.props;
 
