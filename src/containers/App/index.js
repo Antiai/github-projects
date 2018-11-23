@@ -2,15 +2,7 @@ import React, {Component} from 'react';
 import ApolloClient from 'apollo-boost';
 import {ApolloProvider} from 'react-apollo';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
-import dayjs from 'dayjs';
 import Main from '../Main';
-
-const defaults = {
-  query: `language:JavaScript stars:>0 query:"" created:>${dayjs()
-    .subtract(1, 'month')
-    .format('YYYY-MM-DD')}`,
-  first: 10,
-};
 
 const client = new ApolloClient({
   uri: 'https://api.github.com/graphql',
@@ -30,9 +22,7 @@ class App extends Component {
         <Router>
           <Route
             path="/"
-            render={(props) => (
-              <Main query={defaults.query} first={defaults.first} {...props} />
-            )}
+            component={Main}
           />
         </Router>
       </ApolloProvider>
