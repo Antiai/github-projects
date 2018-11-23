@@ -8,6 +8,9 @@ class FormFilter extends Component {
     options: PropTypes.shape({
       licenses: PropTypes.array,
     }),
+    data: PropTypes.shape({
+      license: PropTypes.string,
+    }),
     loading: PropTypes.bool,
     handleSubmit: PropTypes.func,
     handleChange: PropTypes.func,
@@ -16,6 +19,9 @@ class FormFilter extends Component {
   static defaultProps = {
     options: {
       licenses: [],
+    },
+    data: {
+      license: '',
     },
     loading: false,
     handleSubmit: noop,
@@ -33,6 +39,7 @@ class FormFilter extends Component {
   render() {
     const {
       options: {licenses},
+      data: {license},
       loading,
     } = this.props;
     return (
@@ -40,6 +47,7 @@ class FormFilter extends Component {
         <Form.Select
           name="license"
           options={licenses}
+          value={license}
           placeholder="Тип лицензии"
           search
           clearable

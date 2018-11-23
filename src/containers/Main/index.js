@@ -55,17 +55,20 @@ class Main extends Component {
   render() {
     const {
       dataRepos: {search, loading},
+      location,
     } = this.props;
 
     if (loading && !search) return <Preloader />;
 
     const {items} = utils.queries.getSearchResults(search);
+    const data = utils.urls.getQueryParams(location.search);
 
     return (
       <Layout>
         <Header as="h1">Популярные новинки месяца</Header>
         <FormFilter
           options={{licenses: this.getLicenseOptions()}}
+          data={data}
           loading={loading}
           handleSubmit={this.handleSubmit}
           handleChange={this.handleChange}
