@@ -1,5 +1,6 @@
 export default {
-  getQueryParamByName: (searchQuery, name) => new URLSearchParams(searchQuery).get(name),
+  getQueryParamByName: (searchQuery, name) =>
+    new URLSearchParams(searchQuery).get(name),
 
   updateQueryParamByName: (searchQuery, name, data) => {
     const currentUrlParams = new URLSearchParams(searchQuery);
@@ -24,5 +25,5 @@ export default {
     }
 
     return params;
-  }
+  },
 };

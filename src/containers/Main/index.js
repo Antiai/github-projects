@@ -7,6 +7,7 @@ import * as utils from '../../utils';
 import ListRepos from '../../components/ListRepos';
 import Layout from '../../components/Layout';
 import FormFilter from '../../components/FormFilter';
+import Preloader from '../../components/Preloader';
 
 class Main extends Component {
   static propTypes = {
@@ -53,10 +54,10 @@ class Main extends Component {
 
   render() {
     const {
-      data: {search, loading},
+      dataRepos: {search, loading},
     } = this.props;
 
-    if (loading) return <div>Загрузка...</div>;
+    if (loading && !search) return <Preloader />;
 
     const {items} = utils.queries.getSearchResults(search);
 
@@ -65,6 +66,7 @@ class Main extends Component {
         <Header as="h1">Популярные новинки месяца</Header>
         <FormFilter
           options={{licenses: this.getLicenseOptions()}}
+          loading={loading}
           handleSubmit={this.handleSubmit}
           handleChange={this.handleChange}
         />
@@ -76,6 +78,7 @@ class Main extends Component {
 
 export default compose(
   graphql(queries.repos.FIND_REPOS, {
+    name: 'dataRepos',
     options: (props) => {
       const queryParams = utils.urls.getQueryParams(props.location.search);
       const variables = utils.graphql.getVariables(queryParams);

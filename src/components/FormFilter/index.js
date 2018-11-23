@@ -8,6 +8,7 @@ class FormFilter extends Component {
     options: PropTypes.shape({
       licenses: PropTypes.array,
     }),
+    loading: PropTypes.bool,
     handleSubmit: PropTypes.func,
     handleChange: PropTypes.func,
   };
@@ -16,6 +17,7 @@ class FormFilter extends Component {
     options: {
       licenses: [],
     },
+    loading: false,
     handleSubmit: noop,
     handleChange: noop,
   };
@@ -31,6 +33,7 @@ class FormFilter extends Component {
   render() {
     const {
       options: {licenses},
+      loading,
     } = this.props;
     return (
       <Form size="large" onSubmit={this.onSubmit}>
@@ -40,6 +43,8 @@ class FormFilter extends Component {
           placeholder="Тип лицензии"
           search
           clearable
+          loading={loading}
+          disabled={loading}
           onChange={this.onChange}
         />
       </Form>
