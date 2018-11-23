@@ -23,10 +23,9 @@ export default {
       .subtract(time, timeUnit)
       .format('YYYY-MM-DD')}`;
     const licenseFilter = license ? `license:${license}` : '';
-    const queryFilter = query ? `query:${query}` : '';
 
     return {
-      query: `language:${language} stars:${stars} created:${created} ${licenseFilter} ${queryFilter}`,
+      query: `language:${language} stars:${stars} created:${created} ${licenseFilter} ${query}`,
       first,
     };
   },

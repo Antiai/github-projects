@@ -50,7 +50,31 @@ class Main extends Component {
     });
   };
 
-  handleSubmit = () => {};
+  handleSubmit = (data) => {
+    // debugger
+    const {
+      match: {url},
+      location: {search},
+      history,
+    } = this.props;
+
+    let searchQuery = new URLSearchParams(search);
+
+    Object.keys(data).forEach((key) => {
+      searchQuery = data[key]
+        ? utils.urls.updateQueryParamByName(
+            searchQuery.toString(),
+            key,
+            data[key]
+          )
+        : utils.urls.deleteQueryParamByName(searchQuery.toString(), key);
+    });
+
+    history.push({
+      pathname: url,
+      search: searchQuery.toString(),
+    });
+  };
 
   render() {
     const {
