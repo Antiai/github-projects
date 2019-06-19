@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {graphql} from 'react-apollo';
 import {Header} from 'semantic-ui-react';
@@ -9,70 +9,54 @@ import Layout from '../../components/Layout';
 import FormFilter from '../../components/FormFilter';
 import Preloader from '../../components/Preloader';
 
-class Main extends Component {
-  static propTypes = {
-    query: PropTypes.string,
-    first: PropTypes.number,
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired,
-    pageData: PropTypes.object,
-  };
+function Main(props) {
+  const {
+    pageData: {licenses = [], refetch, search: userQuery, loading},
+    match: {url},
+  } = props;
+  const {
+    location: {search},
+    history,
+  } = window;
 
-  static defaultProps = {
-    pageData: {},
-  };
+  const [licenseList, setLicenseList] = useState([]);
+  const licenseListIsEmpty = !licenseList.length;
 
-  state = {
-    licenseList: [],
-  };
+  useEffect(
+    () => {
+      if (licenses.length && !licenseList.length) setLicenseList(licenses);
+    },
+    [licenses]
+  );
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    const {
-      pageData: {licenses = []},
-    } = this.props;
-    const {licenseList} = this.state;
-
-    if (licenses.length && !licenseList.length)
-      this.setState({licenseList: licenses});
-  }
-
-  getLicenseOptions() {
-    const {licenseList: licenses} = this.state;
-
-    return licenses.map((license) => ({
+  const getLicenseOptions = () =>
+    licenseList.map((license) => ({
       key: license.id,
       value: license.key,
       text: license.name,
     }));
-  }
 
-  handleChange = (field) => {
-    const {
-      match: {url},
-      location: {search},
-      history,
-    } = this.props;
+  const refetchRepos = (searchQuery) => {
+    const queryParams = utils.urls.getQueryParams(searchQuery);
+    const variables = utils.graphql.getVariables(queryParams);
+
+    history.pushState({}, 'repos', `${url}?${searchQuery.toString()}`);
+
+    refetch({...variables, licenseListIsEmpty});
+  };
+
+  const handleChange = (field) => {
     const {name, value} = field;
+    const search = window.location.search;
 
     const searchQuery = value
       ? utils.urls.updateQueryParamByName(search, name, value)
       : utils.urls.deleteQueryParamByName(search, name);
 
-    history.push({
-      pathname: url,
-      search: searchQuery.toString(),
-    });
+    refetchRepos(searchQuery);
   };
 
-  handleSubmit = (data) => {
-    const {
-      location: {search},
-      pageData: {refetch},
-    } = this.props;
-    const {licenseList} = this.state;
-
-    const licenseListIsEmpty = !licenseList.length;
+  const handleSubmit = (data) => {
     let searchQuery = new URLSearchParams(search);
 
     Object.keys(data).forEach((key) => {
@@ -85,41 +69,44 @@ class Main extends Component {
         : utils.urls.deleteQueryParamByName(searchQuery.toString(), key);
     });
 
-    const queryParams = utils.urls.getQueryParams(searchQuery);
-    const variables = utils.graphql.getVariables(queryParams);
-
-    refetch({...variables, licenseListIsEmpty});
+    refetchRepos(searchQuery);
   };
 
-  render() {
-    const {
-      pageData: {search, loading},
-      location,
-    } = this.props;
+  if (loading && !userQuery) return <Preloader />;
 
-    if (loading && !search) return <Preloader />;
+  const {items} = utils.queries.getSearchResults(userQuery);
+  const data = utils.urls.getQueryParams(search);
+  const formFilterOptions = {
+    licenses: getLicenseOptions(),
+  };
 
-    const {items} = utils.queries.getSearchResults(search);
-    const data = utils.urls.getQueryParams(location.search);
-    const formFilterOptions = {
-      licenses: this.getLicenseOptions(),
-    };
-
-    return (
-      <Layout>
-        <Header as="h1">Популярные новинки месяца</Header>
-        <FormFilter
-          options={formFilterOptions}
-          data={data}
-          loading={loading}
-          handleSubmit={this.handleSubmit}
-          handleChange={this.handleChange}
-        />
-        <ListRepos items={items} />
-      </Layout>
-    );
-  }
+  return (
+    <Layout>
+      <Header as="h1">Популярные новинки месяца</Header>
+      <FormFilter
+        options={formFilterOptions}
+        data={data}
+        loading={loading}
+        handleSubmit={handleSubmit}
+        handleChange={handleChange}
+      />
+      <ListRepos items={items} />
+    </Layout>
+  );
 }
+
+Main.propTypes = {
+  query: PropTypes.string,
+  first: PropTypes.number,
+  match: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  pageData: PropTypes.object,
+};
+
+Main.defaultProps = {
+  pageData: {},
+};
 
 export default graphql(
   gql`
