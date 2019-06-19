@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {graphql, compose} from 'react-apollo';
+import {graphql} from 'react-apollo';
 import {Header} from 'semantic-ui-react';
-import * as queries from '../../qraphql/queries';
+import gql from 'graphql-tag';
 import * as utils from '../../utils';
 import ListRepos from '../../components/ListRepos';
 import Layout from '../../components/Layout';
@@ -16,14 +16,29 @@ class Main extends Component {
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
+    pageData: PropTypes.object,
   };
 
-  getLicenseOptions() {
-    const {
-      dataLicenses: {licenses, loading},
-    } = this.props;
+  static defaultProps = {
+    pageData: {},
+  };
 
-    if (loading) return [];
+  state = {
+    licenseList: [],
+  };
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const {
+      pageData: {licenses = []},
+    } = this.props;
+    const {licenseList} = this.state;
+
+    if (licenses.length && !licenseList.length)
+      this.setState({licenseList: licenses});
+  }
+
+  getLicenseOptions() {
+    const {licenseList: licenses} = this.state;
 
     return licenses.map((license) => ({
       key: license.id,
@@ -52,11 +67,12 @@ class Main extends Component {
 
   handleSubmit = (data) => {
     const {
-      match: {url},
       location: {search},
-      history,
+      pageData: {refetch},
     } = this.props;
+    const {licenseList} = this.state;
 
+    const licenseListIsEmpty = !licenseList.length;
     let searchQuery = new URLSearchParams(search);
 
     Object.keys(data).forEach((key) => {
@@ -69,15 +85,15 @@ class Main extends Component {
         : utils.urls.deleteQueryParamByName(searchQuery.toString(), key);
     });
 
-    history.push({
-      pathname: url,
-      search: searchQuery.toString(),
-    });
+    const queryParams = utils.urls.getQueryParams(searchQuery);
+    const variables = utils.graphql.getVariables(queryParams);
+
+    refetch({...variables, licenseListIsEmpty});
   };
 
   render() {
     const {
-      dataRepos: {search, loading},
+      pageData: {search, loading},
       location,
     } = this.props;
 
@@ -85,12 +101,15 @@ class Main extends Component {
 
     const {items} = utils.queries.getSearchResults(search);
     const data = utils.urls.getQueryParams(location.search);
+    const formFilterOptions = {
+      licenses: this.getLicenseOptions(),
+    };
 
     return (
       <Layout>
         <Header as="h1">Популярные новинки месяца</Header>
         <FormFilter
-          options={{licenses: this.getLicenseOptions()}}
+          options={formFilterOptions}
           data={data}
           loading={loading}
           handleSubmit={this.handleSubmit}
@@ -102,19 +121,57 @@ class Main extends Component {
   }
 }
 
-export default compose(
-  graphql(queries.repos.FIND_REPOS, {
-    name: 'dataRepos',
+export default graphql(
+  gql`
+    query MainPage(
+      $query: String!
+      $first: Int!
+      $licenseListIsEmpty: Boolean!
+    ) {
+      search(type: REPOSITORY, query: $query, first: $first) {
+        edges {
+          node {
+            ... on Repository {
+              id
+              url
+              name
+              description
+              forkCount
+              stargazers {
+                totalCount
+              }
+              licenseInfo {
+                id
+                key
+                name
+              }
+              updatedAt
+              createdAt
+            }
+          }
+        }
+      }
+
+      licenses @include(if: $licenseListIsEmpty) {
+        id
+        key
+        name
+      }
+    }
+  `,
+  {
+    name: 'pageData',
     options: (props) => {
       const queryParams = utils.urls.getQueryParams(props.location.search);
       const variables = utils.graphql.getVariables(queryParams);
 
       return {
-        variables,
+        variables: {
+          ...variables,
+          licenseListIsEmpty: true,
+        },
+        partialRefetch: true,
       };
     },
-  }),
-  graphql(queries.licenses.GET_LICENSES, {
-    name: 'dataLicenses',
-  })
+  }
 )(Main);
