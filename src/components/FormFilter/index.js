@@ -14,8 +14,7 @@ class FormFilter extends Component {
       first: PropTypes.string,
     }),
     loading: PropTypes.bool,
-    handleSubmit: PropTypes.func,
-    handleChange: PropTypes.func,
+    dispatch: PropTypes.func,
   };
 
   static defaultProps = {
@@ -28,8 +27,7 @@ class FormFilter extends Component {
       first: '10',
     },
     loading: false,
-    handleSubmit: noop,
-    handleChange: noop,
+    dispatch: noop,
   };
 
   state = {
@@ -37,15 +35,17 @@ class FormFilter extends Component {
   };
 
   onChange = (e, field) => {
+    const {dispatch} = this.props;
     const {type, value} = field;
     if (type === 'text') return this.setState({query: value});
 
-    this.props.handleChange(field);
+    dispatch({type: 'change', payload: field});
   };
 
   onSubmit = () => {
+    const {dispatch, data} = this.props;
     const {query} = this.state;
-    this.props.handleSubmit({query});
+    dispatch({type: 'submit', payload: {...data, query}});
   };
 
   render() {

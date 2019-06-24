@@ -1,4 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 import PropTypes from 'prop-types';
 import {graphql} from 'react-apollo';
 import {Header} from 'semantic-ui-react';
@@ -8,6 +13,43 @@ import ListRepos from '../../components/ListRepos';
 import Layout from '../../components/Layout';
 import FormFilter from '../../components/FormFilter';
 import Preloader from '../../components/Preloader';
+
+const initialState = '';
+
+function reducer(state, action) {
+  const {
+    location: {search},
+  } = window;
+  const {type} = action;
+
+  switch (type) {
+    case 'change':
+      const {
+        payload: {name, value},
+      } = action;
+
+      return value
+        ? utils.urls.updateQueryParamByName(search, name, value)
+        : utils.urls.deleteQueryParamByName(search, name);
+
+    case 'submit':
+      const {payload: data} = action;
+      let searchQuery = new URLSearchParams(search);
+
+      Object.keys(data).forEach((key) => {
+        searchQuery = data[key]
+          ? utils.urls.updateQueryParamByName(
+              searchQuery.toString(),
+              key,
+              data[key]
+            )
+          : utils.urls.deleteQueryParamByName(searchQuery.toString(), key);
+      });
+
+      return searchQuery;
+    default:
+  }
+}
 
 function Main(props) {
   const {
@@ -24,71 +66,58 @@ function Main(props) {
 
   useEffect(
     () => {
-      if (licenses.length && !licenseList.length) setLicenseList(licenses);
+      if (licenses.length && !licenseList.length) {
+        const licenseList = licenses.map((license) => ({
+          key: license.id,
+          value: license.key,
+          text: license.name,
+        }));
+        setLicenseList(licenseList);
+      }
     },
     [licenses]
   );
 
-  const getLicenseOptions = () =>
-    licenseList.map((license) => ({
-      key: license.id,
-      value: license.key,
-      text: license.name,
-    }));
+  const formFilterOptions = useMemo(
+    () => ({
+      licenses: licenseList,
+    }),
+    [licenseList]
+  );
 
-  const refetchRepos = (searchQuery) => {
-    const queryParams = utils.urls.getQueryParams(searchQuery);
-    const variables = utils.graphql.getVariables(queryParams);
+  const [searchQuery, dispatch] = useReducer(reducer, initialState);
 
-    history.pushState({}, 'repos', `${url}?${searchQuery.toString()}`);
+  // refetch repos
+  useEffect(
+    () => {
+      const queryParams = utils.urls.getQueryParams(searchQuery);
+      const variables = utils.graphql.getVariables(queryParams);
 
-    refetch({...variables, licenseListIsEmpty});
-  };
+      history.pushState({}, 'repos', `${url}?${searchQuery.toString()}`);
 
-  const handleChange = (field) => {
-    const {name, value} = field;
-    const search = window.location.search;
+      refetch({...variables, licenseListIsEmpty});
+    },
+    [searchQuery]
+  );
 
-    const searchQuery = value
-      ? utils.urls.updateQueryParamByName(search, name, value)
-      : utils.urls.deleteQueryParamByName(search, name);
-
-    refetchRepos(searchQuery);
-  };
-
-  const handleSubmit = (data) => {
-    let searchQuery = new URLSearchParams(search);
-
-    Object.keys(data).forEach((key) => {
-      searchQuery = data[key]
-        ? utils.urls.updateQueryParamByName(
-            searchQuery.toString(),
-            key,
-            data[key]
-          )
-        : utils.urls.deleteQueryParamByName(searchQuery.toString(), key);
-    });
-
-    refetchRepos(searchQuery);
-  };
+  const {items} = useMemo(() => utils.queries.getSearchResults(userQuery), [
+    userQuery,
+  ]);
+  const data = useMemo(() => utils.urls.getQueryParams(search), [search]);
+  const isLoading = useMemo(() => loading && !userQuery, [loading, userQuery]);
 
   if (loading && !userQuery) return <Preloader />;
 
-  const {items} = utils.queries.getSearchResults(userQuery);
-  const data = utils.urls.getQueryParams(search);
-  const formFilterOptions = {
-    licenses: getLicenseOptions(),
-  };
-
-  return (
+  return isLoading ? (
+    <Preloader />
+  ) : (
     <Layout>
       <Header as="h1">Популярные новинки месяца</Header>
       <FormFilter
         options={formFilterOptions}
         data={data}
         loading={loading}
-        handleSubmit={handleSubmit}
-        handleChange={handleChange}
+        dispatch={dispatch}
       />
       <ListRepos items={items} />
     </Layout>
