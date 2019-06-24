@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useReducer,
-} from 'react';
+import React, {useState, useEffect, useMemo, useReducer} from 'react';
 import PropTypes from 'prop-types';
 import {graphql} from 'react-apollo';
 import {Header} from 'semantic-ui-react';
